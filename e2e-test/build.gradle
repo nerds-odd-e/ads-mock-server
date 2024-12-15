@@ -40,6 +40,8 @@ dependencies {
     testImplementation 'com.github.leeonky:jfactory-cucumber:0.7.3'
     testImplementation 'com.github.leeonky:RESTful-cucumber:0.7.3'
     testImplementation 'com.github.leeonky:DAL-extension-basic:0.7.3'
+
+    testImplementation group: 'net.java.dev.jna', name: 'jna', version: '5.15.0'
 }
 
 idea {
@@ -61,7 +63,8 @@ task cucumber(type: JavaExec) {
     main = "io.cucumber.core.cli.Main"
     classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
     args = ['--plugin', 'pretty',
-            '--glue', 'com',
+            '--glue', 'com.odde',
+            '--glue', 'com.github.leeonky',
             project.hasProperty('file') ? project.property('file') : 'src/test/resources']
 }
 

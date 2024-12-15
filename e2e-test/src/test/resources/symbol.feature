@@ -4,8 +4,12 @@ Feature: Symbol
     When POST "/symbols":
     """
     {
-      "name": "b_error",
+      "name": "PC_PLC.b_error",
       "type": "INT",
       "value": 0
     }
+    """
+    Then ads operation should:
+    """
+
     """
