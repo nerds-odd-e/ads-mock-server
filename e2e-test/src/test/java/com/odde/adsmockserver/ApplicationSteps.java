@@ -16,7 +16,7 @@ public class ApplicationSteps {
 
     @Before
     public void setBaseUrl() {
-        restfulStep.setBaseUrl("http://localhost");
+        restfulStep.setBaseUrl("http://localhost:5000");
     }
 
 }
