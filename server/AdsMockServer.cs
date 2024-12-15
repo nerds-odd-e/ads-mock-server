@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text;
 using TwinCAT.Ads;
 using TwinCAT.Ads.Server;
 using TwinCAT.Ads.Server.TypeSystem;
@@ -15,7 +16,7 @@ namespace server
 
         static ushort s_Port = 851;
 
-        SymbolicAnyTypeMarshaler _symbolMarshaler = new();
+        SymbolicAnyTypeMarshaler _symbolMarshaler = new(Encoding.UTF8);
 
         private DataArea dataArea = new("dataArea", 0x01, 0x1000, 0x1000);
         private PrimitiveType dtInt = new("INT", typeof(short));
@@ -95,6 +96,16 @@ namespace server
         {
             symbolFactory.AddSymbol(request.name, dtInt, dataArea);
             symbolValues[request.name] = (short)request.value;
+        }
+
+        public void Connect()
+        {
+            Console.WriteLine("Starting the AdsSymbolicServer ...\n");
+            ConnectServer();
+            Console.WriteLine($"Symbolic Test Server runnning on Address: '{ServerAddress}' ...\n");
+            Console.WriteLine($"For testing the server see the ReadMe.md file in project root");
+            Console.WriteLine($"or type the following command from Powrshell with installed 'TcXaeMgmt' module:\n");
+            Console.WriteLine($"PS> test-adsroute -NetId {ServerAddress.NetId} -port {ServerAddress.Port}\n\n");
         }
     }
 }

@@ -7,10 +7,17 @@ namespace server.Controllers
     [Route("[controller]")]
     public class AdsController : ControllerBase
     {
+        private readonly AdsMockServer _adsMockServer;
+
+        public AdsController(AdsMockServer adsMockServer)
+        {
+            _adsMockServer = adsMockServer;
+        }
+
         [HttpPost ("/symbols")]
         public void CreateSymbol([FromBody] CreateSymbolRequest request)
         {
-            Program.server.AddSymbol(request);
+            _adsMockServer.AddSymbol(request);
         }
     }
 }

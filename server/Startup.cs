@@ -32,10 +32,11 @@ namespace server
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "server", Version = "v1" });
             });
+            services.AddSingleton<AdsMockServer, AdsMockServer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AdsMockServer adsMockServer)
         {
             if (env.IsDevelopment())
             {
@@ -50,6 +51,8 @@ namespace server
             {
                 endpoints.MapControllers();
             });
+
+            adsMockServer.Connect();
         }
     }
 }
