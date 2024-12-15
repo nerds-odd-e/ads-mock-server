@@ -16,7 +16,7 @@ namespace server
 {
     public class Program
     {
-        static AdsMockServer server = new();
+        public static AdsMockServer server = new();
 
         public static void Main(string[] args)
         {

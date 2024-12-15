@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using TwinCAT.Ads;
 using TwinCAT.Ads.Server;
@@ -15,6 +16,11 @@ namespace server
         static ushort s_Port = 851;
 
         SymbolicAnyTypeMarshaler _symbolMarshaler = new();
+
+        private DataArea dataArea = new("dataArea", 0x01, 0x1000, 0x1000);
+        private PrimitiveType dtInt = new("INT", typeof(short));
+
+        private Dictionary<string, object> symbolValues = new();
 
         public AdsMockServer()
             : base(s_Port, "Ads Mock Server", null)
@@ -37,28 +43,21 @@ namespace server
 
         protected override void OnConnected()
         {
-            AddSymbols();
+            Init();
             base.OnConnected();
         }
 
-        private void AddSymbols()
+        private void Init()
         {
-            PrimitiveType dtInt = new PrimitiveType("INT", typeof(short)); // 2-Byte size
-
             symbolFactory.AddType(dtInt);
 
-            DataArea pcPlc = new DataArea("PC_PLC", 0x01, 0x1000, 0x1000);
-
-            symbolFactory.AddDataArea(pcPlc);
-
-            symbolFactory.AddSymbol("PC_PLC.b_error", dtInt, pcPlc);
+            symbolFactory.AddDataArea(dataArea);
         }
 
         protected override AdsErrorCode OnReadRawValue(ISymbol symbol, Span<byte> span)
         {
-            short value = 42;
-            // AdsErrorCode ret = OnGetValue(symbol, out value);
-            AdsErrorCode ret = AdsErrorCode.NoError;
+            object value;
+            AdsErrorCode ret = OnGetValue(symbol, out value);
 
             if (value != null)
             {
@@ -88,7 +87,14 @@ namespace server
 
         protected override AdsErrorCode OnGetValue(ISymbol symbol, out object value)
         {
-            throw new NotImplementedException();
+            value = symbolValues[symbol.InstancePath];
+            return AdsErrorCode.NoError;
+        }
+
+        public void AddSymbol(CreateSymbolRequest request)
+        {
+            symbolFactory.AddSymbol(request.name, dtInt, dataArea);
+            symbolValues[request.name] = (short)request.value;
         }
     }
 }
