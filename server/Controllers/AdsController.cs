@@ -17,7 +17,14 @@ namespace server.Controllers
         [HttpPost ("/symbols")]
         public void CreateSymbol([FromBody] CreateSymbolRequest request)
         {
+            // Console.WriteLine($"request symbol name: {request.name}, type: {request.type}, value: {request.value}");
             _adsMockServer.AddSymbol(request);
+        }
+
+        [HttpDelete ("/symbols")]
+        public void ClearAllSymbols()
+        {
+            _adsMockServer.ClearAllSymbols();
         }
     }
 }

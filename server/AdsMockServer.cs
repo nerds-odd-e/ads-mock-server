@@ -107,5 +107,11 @@ namespace server
             Console.WriteLine($"or type the following command from Powrshell with installed 'TcXaeMgmt' module:\n");
             Console.WriteLine($"PS> test-adsroute -NetId {ServerAddress.NetId} -port {ServerAddress.Port}\n\n");
         }
+
+        public void ClearAllSymbols()
+        {
+            symbolFactory.ClearSymbols();
+            symbolValues.Clear();
+        }
     }
 }
