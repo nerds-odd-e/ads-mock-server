@@ -1,12 +1,12 @@
 Feature: Symbol
 
-  Scenario: add an int symbol
+  Scenario Outline: add an <type> symbol
     When POST "/symbols":
     """
     {
       "name": "PC_PLC.b_error",
-      "type": "INT",
-      "value": 42
+      "type": "<type>",
+      "value": <value>
     }
     """
     Then response should be:
@@ -15,8 +15,13 @@ Feature: Symbol
     """
     Then ads operation should:
     """
-    readIntSymbolByName['PC_PLC.b_error']= 42s
+    <adsOpt>['PC_PLC.b_error']= <expected>
     """
+    Examples:
+      | type | value | adsOpt               | expected |
+      | INT  | 42    | readIntSymbolByName  | 42s      |
+      | BOOL | true  | readBoolSymbolByName | true     |
+      | BOOL | false | readBoolSymbolByName | false    |
 
   Scenario: clear all symbols
     When POST "Symbol" "/symbols":

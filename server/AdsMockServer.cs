@@ -20,6 +20,7 @@ namespace server
 
         private DataArea dataArea = new("dataArea", 0x01, 0x1000, 0x1000);
         private PrimitiveType dtInt = new("INT", typeof(short));
+        private PrimitiveType dtBool = new("BOOL", typeof(bool)); // 1-Byte size
 
         private Dictionary<string, object> symbolValues = new();
 
@@ -94,8 +95,17 @@ namespace server
 
         public void AddSymbol(CreateSymbolRequest request)
         {
-            symbolFactory.AddSymbol(request.name, dtInt, dataArea);
-            symbolValues[request.name] = (short)request.value;
+            switch (request.type)
+            {
+                case "INT":
+                    symbolFactory.AddSymbol(request.name, dtInt, dataArea);
+                    symbolValues[request.name] = request.value.GetInt16();
+                    break;
+                case "BOOL":
+                    symbolFactory.AddSymbol(request.name, dtBool, dataArea);
+                    symbolValues[request.name] = request.value.GetBoolean();
+                    break;
+            }
         }
 
         public void Connect()
