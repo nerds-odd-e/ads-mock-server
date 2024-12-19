@@ -18,11 +18,16 @@ public class AdsOperations {
     private static final int ADS_PORT = 851;
     private static final int ADS_HDL_VAR_SIZE = Integer.SIZE / Byte.SIZE;
     private static final int ADS_INT_SIZE = Short.SIZE / Byte.SIZE;
+    private static final int ADS_DINT_SIZE = Integer.SIZE / Byte.SIZE;
     private static final int ADS_DOUBLE_SIZE = Double.SIZE / Byte.SIZE;
     private static final int ADS_BOOL_SIZE = 1;
 
-    public Short readIntSymbolByName(String name) {
+    public short readIntSymbolByName(String name) {
         return readSymbolByName(name, this::readIntSymbolByHandler);
+    }
+
+    public int readDIntSymbolByName(String name) {
+        return readSymbolByName(name, this::readDIntSymbolByHandler);
     }
 
     public <T> T readSymbolByName(String name, BiFunction<AmsAddr, IntByReference, T> readByHandler) {
@@ -60,6 +65,12 @@ public class AdsOperations {
     private short readIntSymbolByHandler(AmsAddr addr, IntByReference nHdlVar) {
         ShortByReference nData = new ShortByReference();
         readSymbolByHandler(addr, nHdlVar.getValue(), ADS_INT_SIZE, nData.getPointer(), "Reading int symbol by handler: ");
+        return nData.getValue();
+    }
+
+    private int readDIntSymbolByHandler(AmsAddr addr, IntByReference nHdlVar) {
+        IntByReference nData = new IntByReference();
+        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_DINT_SIZE, nData.getPointer(), "Reading dint symbol by handler: ");
         return nData.getValue();
     }
 

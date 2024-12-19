@@ -23,6 +23,7 @@ Feature: Symbol
       | BOOL  | true   | readBoolSymbolByName  | true     |
       | BOOL  | false  | readBoolSymbolByName  | false    |
       | LREAL | 123.06 | readLRealSymbolByName | 123.06   |
+      | DINT  | 42     | readDIntSymbolByName  | 42       |
 
   Scenario: clear all symbols
     When POST "Symbol" "/symbols":

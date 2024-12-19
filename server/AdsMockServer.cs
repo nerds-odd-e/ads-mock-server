@@ -22,6 +22,7 @@ namespace server
         private PrimitiveType dtInt = new("INT", typeof(short));
         private PrimitiveType dtBool = new("BOOL", typeof(bool)); // 1-Byte size
         private PrimitiveType dtLReal = new("LREAL", typeof(double)); // 8-Byte floating point
+        private PrimitiveType dtDInt = new("DINT", typeof(int)); // 4-Byte size
 
         private Dictionary<string, object> symbolValues = new();
 
@@ -101,6 +102,10 @@ namespace server
                 case "INT":
                     symbolFactory.AddSymbol(request.name, dtInt, dataArea);
                     symbolValues[request.name] = request.value.GetInt16();
+                    break;
+                case "DINT":
+                    symbolFactory.AddSymbol(request.name, dtDInt, dataArea);
+                    symbolValues[request.name] = request.value.GetInt32();
                     break;
                 case "BOOL":
                     symbolFactory.AddSymbol(request.name, dtBool, dataArea);
