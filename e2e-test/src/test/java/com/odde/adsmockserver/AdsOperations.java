@@ -4,10 +4,7 @@ import com.odde.adsmockserver.adsapi.AmsAddr;
 import com.odde.adsmockserver.adsapi.TwinCATADS;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
-import com.sun.jna.ptr.ByteByReference;
-import com.sun.jna.ptr.DoubleByReference;
-import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.ShortByReference;
+import com.sun.jna.ptr.*;
 import org.springframework.stereotype.Component;
 
 import java.util.function.BiFunction;
@@ -20,6 +17,7 @@ public class AdsOperations {
     private static final int ADS_INT_SIZE = Short.SIZE / Byte.SIZE;
     private static final int ADS_DINT_SIZE = Integer.SIZE / Byte.SIZE;
     private static final int ADS_DOUBLE_SIZE = Double.SIZE / Byte.SIZE;
+    private static final int ADS_FLOAT_SIZE = Float.SIZE / Byte.SIZE;
     private static final int ADS_BOOL_SIZE = 1;
 
     public short readIntSymbolByName(String name) {
@@ -46,6 +44,10 @@ public class AdsOperations {
 
     public double readLRealSymbolByName(String name) {
         return readSymbolByName(name, this::readLRealSymbolByHandler);
+    }
+
+    public float readRealSymbolByName(String name) {
+        return readSymbolByName(name, this::readRealSymbolByHandler);
     }
 
     private void openPort() {
@@ -77,6 +79,12 @@ public class AdsOperations {
     private double readLRealSymbolByHandler(AmsAddr addr, IntByReference nHdlVar) {
         DoubleByReference nData = new DoubleByReference();
         readSymbolByHandler(addr, nHdlVar.getValue(), ADS_DOUBLE_SIZE, nData.getPointer(), "Reading double symbol by handler: ");
+        return nData.getValue();
+    }
+
+    private float readRealSymbolByHandler(AmsAddr addr, IntByReference nHdlVar) {
+        FloatByReference nData = new FloatByReference();
+        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_FLOAT_SIZE, nData.getPointer(), "Reading double symbol by handler: ");
         return nData.getValue();
     }
 

@@ -23,6 +23,7 @@ namespace server
         private PrimitiveType dtBool = new("BOOL", typeof(bool)); // 1-Byte size
         private PrimitiveType dtLReal = new("LREAL", typeof(double)); // 8-Byte floating point
         private PrimitiveType dtDInt = new("DINT", typeof(int)); // 4-Byte size
+        private PrimitiveType dtReal = new("REAL", typeof(float)); // 4-Byte floating point
 
         private Dictionary<string, object> symbolValues = new();
 
@@ -114,6 +115,10 @@ namespace server
                 case "LREAL":
                     symbolFactory.AddSymbol(request.name, dtLReal, dataArea);
                     symbolValues[request.name] = request.value.GetDouble();
+                    break;
+                case "REAL":
+                    symbolFactory.AddSymbol(request.name, dtReal, dataArea);
+                    symbolValues[request.name] = request.value.GetSingle();
                     break;
             }
         }
