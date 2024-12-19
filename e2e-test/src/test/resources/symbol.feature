@@ -18,10 +18,11 @@ Feature: Symbol
     <adsOpt>['PC_PLC.b_error']= <expected>
     """
     Examples:
-      | type | value | adsOpt               | expected |
-      | INT  | 42    | readIntSymbolByName  | 42s      |
-      | BOOL | true  | readBoolSymbolByName | true     |
-      | BOOL | false | readBoolSymbolByName | false    |
+      | type  | value  | adsOpt                | expected |
+      | INT   | 42     | readIntSymbolByName   | 42s      |
+      | BOOL  | true   | readBoolSymbolByName  | true     |
+      | BOOL  | false  | readBoolSymbolByName  | false    |
+      | LREAL | 123.06 | readLRealSymbolByName | 123.06   |
 
   Scenario: clear all symbols
     When POST "Symbol" "/symbols":
