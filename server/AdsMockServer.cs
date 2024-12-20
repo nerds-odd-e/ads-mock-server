@@ -94,7 +94,8 @@ namespace server
 
         protected override AdsErrorCode OnWriteRawValue(ISymbol symbol, ReadOnlySpan<byte> span)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("OnWriteRawValue called for symbol: {0} and length: {1}", symbol.InstancePath, span.Length);
+            return AdsErrorCode.NoError;
         }
 
         protected override AdsErrorCode OnSetValue(ISymbol symbol, object value, out bool valueChanged)
