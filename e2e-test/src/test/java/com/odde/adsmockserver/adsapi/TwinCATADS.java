@@ -15,6 +15,7 @@ public interface TwinCATADS extends Library {
     long AdsSyncReadWriteReq(AmsAddr pAddr, int indexGroup, int indexOffset, int cbReadLength, Pointer pReadData, int cbWriteLength, Pointer pWriteData);
     long AdsSyncReadReq(AmsAddr pAddr, int indexGroup, int indexOffset, int cbLength, Pointer pData);
     long AdsSyncWriteReq(AmsAddr pAddr, int indexGroup, int indexOffset, int cbLength, Pointer pData);
+    long AdsSyncReadDeviceInfoReq(AmsAddr pAddr, Pointer pDeviceName, AdsVersion pVersion);
 
     // Ads defines
     int ADSIGRP_SYM_HNDBYNAME = 0xF003;

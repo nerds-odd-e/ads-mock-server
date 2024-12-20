@@ -62,6 +62,7 @@ task cucumber(type: JavaExec) {
     dependsOn assemble, testClasses
     main = "io.cucumber.core.cli.Main"
     classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+    jvmArgs "-Dfile.encoding=UTF-8", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     args = ['--plugin', 'pretty',
             '--glue', 'com.odde',
             '--glue', 'com.github.leeonky',

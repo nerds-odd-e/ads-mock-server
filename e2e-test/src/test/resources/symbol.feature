@@ -77,6 +77,31 @@ Feature: Symbol
     = [1.1, 2.2, 3.3, 4.4, 5.5]
     """
 
+  Scenario: set device info
+    When PUT "/device-info":
+    """
+    {
+      "name": "szb_plc",
+      "version": 1,
+      "revision": 2,
+      "build": 3
+    }
+    """
+    Then response should be:
+    """
+    code= 200
+    """
+    Then ads get device info should be:
+    """
+    = {
+      name: szb_plc
+      version: 1y
+      revision: 2y
+      build: 3s
+    }
+    """
+
+
   Scenario: clear all symbols
     When POST "Symbol" "/symbols":
     """

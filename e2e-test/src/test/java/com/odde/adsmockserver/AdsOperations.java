@@ -1,5 +1,6 @@
 package com.odde.adsmockserver;
 
+import com.odde.adsmockserver.adsapi.AdsVersion;
 import com.odde.adsmockserver.adsapi.AmsAddr;
 import com.odde.adsmockserver.adsapi.TwinCATADS;
 import com.sun.jna.Memory;
@@ -28,6 +29,38 @@ public class AdsOperations {
         releaseHandler(addr, nHdlVar);
         closePort();
         return nData;
+    }
+
+    public AdsDeviceInfo readDeviceInfo() {
+        openPort();
+        AmsAddr addr = getAmsAddr();
+        AdsDeviceInfo adsDeviceInfo = readDeviceInfoByAddr(addr);
+        closePort();
+        return adsDeviceInfo;
+    }
+
+    private AdsDeviceInfo readDeviceInfoByAddr(AmsAddr addr) {
+        try (Memory deviceName = new Memory(16)) {
+            AdsVersion adsVersion = new AdsVersion();
+            long err = TwinCATADS.INSTANCE.AdsSyncReadDeviceInfoReq(addr, deviceName, adsVersion);
+            throwIfError("Read device info", err);
+            return new AdsDeviceInfo(adsVersion, deviceName.getString(0));
+        }
+    }
+
+    public static class AdsDeviceInfo {
+
+        public final String name;
+        public byte version;
+        public byte revision;
+        public short build;
+
+        public AdsDeviceInfo(AdsVersion adsVersion, String name) {
+            this.name = name;
+            this.version = adsVersion.version;
+            this.revision = adsVersion.revision;
+            this.build = adsVersion.build;
+        }
     }
 
     private double[] readLRealArraySymbolByHandler(AmsAddr addr, IntByReference nHdlVar, int size) {

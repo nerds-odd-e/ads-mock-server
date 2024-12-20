@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using server.Controllers;
 using TwinCAT.Ads;
 using TwinCAT.Ads.Server;
@@ -28,6 +30,7 @@ namespace server
         private PrimitiveType dtReal = new("REAL", typeof(float)); // 4-Byte floating point
 
         private Dictionary<string, object> symbolValues = new();
+        private SetDeviceInfoRequest deviceInfo = new();
 
         public AdsMockServer()
             : base(s_Port, "Ads Mock Server", null)
@@ -80,6 +83,13 @@ namespace server
 
             }
             return ret;
+        }
+
+        [Obsolete]
+        protected override Task<AdsErrorCode> ReadDeviceInfoIndicationAsync(AmsAddress sender, uint invokeId, CancellationToken cancel)
+        {
+            AdsVersion adsVersion = new AdsVersion(deviceInfo.version, deviceInfo.revision, deviceInfo.build);
+            return ReadDeviceInfoResponseAsync(sender, invokeId, AdsErrorCode.NoError, deviceInfo.name, adsVersion, cancel);
         }
 
         protected override AdsErrorCode OnWriteRawValue(ISymbol symbol, ReadOnlySpan<byte> span)
@@ -151,6 +161,11 @@ namespace server
                     symbolValues[request.name] = request.value.EnumerateArray().Select(x => x.GetDouble()).ToArray();
                     break;
             }
+        }
+
+        public void SetDeviceInfo(SetDeviceInfoRequest request)
+        {
+            this.deviceInfo = request;
         }
     }
 }

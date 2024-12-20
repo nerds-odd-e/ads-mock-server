@@ -19,4 +19,9 @@ public class AdsSteps {
     public void adsReadArraySymbolByNameAndSizeShould(String name, int size, String expression) {
         expect(adsOperations.readLRealArraySymbolByName(name, size)).should(expression);
     }
+
+    @Then("ads get device info should be:")
+    public void adsGetDeviceInfoShouldBe(String expression) {
+       expect(adsOperations.readDeviceInfo()).should(expression);
+    }
 }

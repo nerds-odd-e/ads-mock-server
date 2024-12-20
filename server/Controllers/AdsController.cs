@@ -17,15 +17,19 @@ namespace server.Controllers
         [HttpPost ("/symbols")]
         public void CreateSymbol([FromBody] CreateSymbolRequest request)
         {
-            // Console.WriteLine($"request symbol name: {request.name}, type: {request.type}, value: {request.value}");
             _adsMockServer.AddSymbol(request);
         }
 
         [HttpPost ("/array-symbols")]
         public void CreateArraySymbol([FromBody] CreateArraySymbolRequest request)
         {
-            // Console.WriteLine($"request symbol name: {request.name}, type: {request.type}, value: {request.value}");
             _adsMockServer.AddArraySymbol(request);
+        }
+
+        [HttpPut ("/device-info")]
+        public void SetDeviceInfo([FromBody] SetDeviceInfoRequest request)
+        {
+            _adsMockServer.SetDeviceInfo(request);
         }
 
         [HttpDelete ("/symbols")]
@@ -33,5 +37,13 @@ namespace server.Controllers
         {
             _adsMockServer.ClearAllSymbols();
         }
+    }
+
+    public class SetDeviceInfoRequest
+    {
+        public string name { get; set; }
+        public int version { get; set; }
+        public int revision { get; set; }
+        public int build { get; set; }
     }
 }
