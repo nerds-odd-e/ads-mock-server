@@ -3,6 +3,7 @@ package com.odde.adsmockserver;
 import com.odde.adsmockserver.adsapi.AdsVersion;
 import com.odde.adsmockserver.adsapi.AmsAddr;
 import com.odde.adsmockserver.adsapi.TwinCATADS;
+import com.odde.adsmockserver.object.AdsDeviceInfo;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.*;
@@ -45,21 +46,6 @@ public class AdsOperations {
             long err = TwinCATADS.INSTANCE.AdsSyncReadDeviceInfoReq(addr, deviceName, adsVersion);
             throwIfError("Read device info", err);
             return new AdsDeviceInfo(adsVersion, deviceName.getString(0));
-        }
-    }
-
-    public static class AdsDeviceInfo {
-
-        public final String name;
-        public byte version;
-        public byte revision;
-        public short build;
-
-        public AdsDeviceInfo(AdsVersion adsVersion, String name) {
-            this.name = name;
-            this.version = adsVersion.version;
-            this.revision = adsVersion.revision;
-            this.build = adsVersion.build;
         }
     }
 
