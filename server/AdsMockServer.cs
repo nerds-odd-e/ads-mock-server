@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
+using server.Controllers;
 using TwinCAT.Ads;
 using TwinCAT.Ads.Server;
 using TwinCAT.Ads.Server.TypeSystem;
@@ -137,6 +139,18 @@ namespace server
         {
             symbolFactory.ClearSymbols();
             symbolValues.Clear();
+        }
+
+        public void AddArraySymbol(CreateArraySymbolRequest request)
+        {
+            switch (request.type)
+            {
+                case "LREAL":
+                    ArrayType doubleArrayType = new ArrayType(dtLReal, new DimensionCollection().AddDimension(new Dimension(0, request.size)));
+                    symbolFactory.AddSymbol(request.name, doubleArrayType, dataArea);
+                    symbolValues[request.name] = request.value.EnumerateArray().Select(x => x.GetDouble()).ToArray();
+                    break;
+            }
         }
     }
 }

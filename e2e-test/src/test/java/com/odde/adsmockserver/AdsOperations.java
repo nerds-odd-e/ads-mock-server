@@ -20,6 +20,23 @@ public class AdsOperations {
     private static final int ADS_FLOAT_SIZE = Float.SIZE / Byte.SIZE;
     private static final int ADS_BOOL_SIZE = 1;
 
+    public double[] readLRealArraySymbolByName(String name, int size) {
+        openPort();
+        AmsAddr addr = getAmsAddr();
+        IntByReference nHdlVar = getHandlerByName(addr, name);
+        double[] nData = readLRealArraySymbolByHandler(addr, nHdlVar, size);
+        releaseHandler(addr, nHdlVar);
+        closePort();
+        return nData;
+    }
+
+    private double[] readLRealArraySymbolByHandler(AmsAddr addr, IntByReference nHdlVar, int size) {
+        try (Memory nData = new Memory(size * ADS_DOUBLE_SIZE)) {
+            readSymbolByHandler(addr, nHdlVar.getValue(), ADS_DOUBLE_SIZE * size, nData, "Reading double array symbol by handler: ");
+            return nData.getDoubleArray(0, size);
+        }
+    }
+
     public short readIntSymbolByName(String name) {
         return readSymbolByName(name, this::readIntSymbolByHandler);
     }
@@ -84,7 +101,7 @@ public class AdsOperations {
 
     private float readRealSymbolByHandler(AmsAddr addr, IntByReference nHdlVar) {
         FloatByReference nData = new FloatByReference();
-        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_FLOAT_SIZE, nData.getPointer(), "Reading double symbol by handler: ");
+        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_FLOAT_SIZE, nData.getPointer(), "Reading float symbol by handler: ");
         return nData.getValue();
     }
 

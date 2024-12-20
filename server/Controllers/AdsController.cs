@@ -21,6 +21,13 @@ namespace server.Controllers
             _adsMockServer.AddSymbol(request);
         }
 
+        [HttpPost ("/array-symbols")]
+        public void CreateArraySymbol([FromBody] CreateArraySymbolRequest request)
+        {
+            // Console.WriteLine($"request symbol name: {request.name}, type: {request.type}, value: {request.value}");
+            _adsMockServer.AddArraySymbol(request);
+        }
+
         [HttpDelete ("/symbols")]
         public void ClearAllSymbols()
         {
