@@ -101,12 +101,20 @@ Feature: Symbol
     }
     """
 
-
   Scenario: clear all symbols
     When POST "Symbol" "/symbols":
     """
     {
       "name": "PC_PLC.b_error"
+    }
+    """
+    When PUT "/device-info":
+    """
+    {
+      "name": "szb_plc",
+      "version": 1,
+      "revision": 2,
+      "build": 3
     }
     """
     When DELETE "/symbols"
@@ -117,4 +125,13 @@ Feature: Symbol
     Then ads operation should:
     """
     readIntSymbolByName['PC_PLC.b_error']::throw.message= 'Getting handler by name: PC_PLC.b_error failed with error code: 1808'
+    """
+    Then ads get device info should be:
+    """
+    = {
+      name: not_set
+      version: 0y
+      revision: 0y
+      build: 0s
+    }
     """

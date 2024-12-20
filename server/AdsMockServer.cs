@@ -149,6 +149,7 @@ namespace server
         {
             symbolFactory.ClearSymbols();
             symbolValues.Clear();
+            deviceInfo = new SetDeviceInfoRequest {name = "not_set", version= 0, revision= 0, build= 0};
         }
 
         public void AddArraySymbol(CreateArraySymbolRequest request)
