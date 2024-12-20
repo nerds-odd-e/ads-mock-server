@@ -45,6 +45,38 @@ Feature: Symbol
     = [1.0, 2.0, 3.0]
     """
 
+  Scenario: add same size double array symbol twice
+    When POST "/array-symbols":
+    """
+    {
+      "name": "first",
+      "type": "LREAL",
+      "size": 5,
+      "value": [1.1, 2.2, 3.3, 4.4, 5.5]
+    }
+    """
+    When POST "/array-symbols":
+    """
+    {
+      "name": "second",
+      "type": "LREAL",
+      "size": 5,
+      "value": [1.0, 2.0, 3.0, 4.0, 5.0]
+    }
+    """
+    Then response should be:
+    """
+    code= 200
+    """
+    Then ads read LREAL array symbol by name "second" and size 5 should:
+    """
+    = [1.0, 2.0, 3.0, 4.0, 5.0]
+    """
+    Then ads read LREAL array symbol by name "first" and size 5 should:
+    """
+    = [1.1, 2.2, 3.3, 4.4, 5.5]
+    """
+
   Scenario: clear all symbols
     When POST "Symbol" "/symbols":
     """
