@@ -9,6 +9,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.function.BiFunction;
 
 @Component
@@ -18,8 +19,8 @@ public class AdsOperations {
     private static final int ADS_HDL_VAR_SIZE = Integer.SIZE / Byte.SIZE;
     private static final int ADS_INT_SIZE = Short.SIZE / Byte.SIZE;
     private static final int ADS_DINT_SIZE = Integer.SIZE / Byte.SIZE;
-    private static final int ADS_DOUBLE_SIZE = Double.SIZE / Byte.SIZE;
-    private static final int ADS_FLOAT_SIZE = Float.SIZE / Byte.SIZE;
+    private static final int ADS_LREAL_SIZE = Double.SIZE / Byte.SIZE;
+    private static final int ADS_REAL_SIZE = Float.SIZE / Byte.SIZE;
     private static final int ADS_BOOL_SIZE = 1;
 
     public double[] readLRealArraySymbolByName(String name, int size) {
@@ -40,6 +41,77 @@ public class AdsOperations {
         return adsDeviceInfo;
     }
 
+    public void writeBoolSymbolByName(String name, boolean value) {
+        writeSymbolByName(name, value, this::writeBoolSymbolByHandler);
+    }
+
+    public void writeRealSymbolByName(String name, float value) {
+        writeSymbolByName(name, value, this::writeRealSymbolByHandler);
+    }
+
+    public void writeDIntSymbolByName(String name, int value) {
+        writeSymbolByName(name, value, this::writeDIntSymbolByHandler);
+    }
+
+    public void writeLRealArraySymbolByName(String name, Double[] value) {
+        writeSymbolByName(name, value, this::writeLRealArraySymbolByHandler);
+    }
+
+    private void writeLRealArraySymbolByHandler(AmsAddr amsAddr, IntByReference nHdlVar, Double[] value) {
+        try (Memory memory = new Memory(ADS_LREAL_SIZE * value.length)) {
+            for (int i = 0; i < value.length; i++) {
+                memory.setDouble(i * ADS_LREAL_SIZE, value[i]);
+            }
+            writeSymbolByHandler(amsAddr, nHdlVar, memory, ADS_LREAL_SIZE * value.length, "Write LREAL array symbol value: " + Arrays.toString(value));
+        }
+    }
+
+    private void writeDIntSymbolByHandler(AmsAddr amsAddr, IntByReference nHdlVar, int value) {
+        try (Memory memory = new Memory(ADS_DINT_SIZE)) {
+            memory.setInt(0, value);
+            writeSymbolByHandler(amsAddr, nHdlVar, memory, ADS_DINT_SIZE, "Write DInt symbol value: " + value);
+        }
+    }
+
+    private void writeRealSymbolByHandler(AmsAddr amsAddr, IntByReference nHdlVar, float value) {
+        try (Memory memory = new Memory(ADS_REAL_SIZE)) {
+            memory.setFloat(0, value);
+            writeSymbolByHandler(amsAddr, nHdlVar, memory, ADS_REAL_SIZE, "Write Real symbol value: " + value);
+        }
+    }
+
+    @FunctionalInterface
+    public interface TriConsumer<T, U, V> {
+        void accept(T t, U u, V v);
+    }
+
+    private <T> void writeSymbolByName(String name, T value, TriConsumer<AmsAddr, IntByReference, T> consumer) {
+        openPort();
+        AmsAddr addr = getAmsAddr();
+        IntByReference nHdlVar = getHandlerByName(addr, name);
+        consumer.accept(addr, nHdlVar, value);
+        releaseHandler(addr, nHdlVar);
+        closePort();
+    }
+
+    public void writeLRealSymbolByName(String name, double value) {
+        writeSymbolByName(name, value, this::writeLRealSymbolByHandler);
+    }
+
+    private void writeLRealSymbolByHandler(AmsAddr amsAddr, IntByReference nHdlVar, double value) {
+        try (Memory memory = new Memory(ADS_LREAL_SIZE)) {
+            memory.setDouble(0, value);
+            writeSymbolByHandler(amsAddr, nHdlVar, memory, ADS_LREAL_SIZE, "Write LReal symbol value: " + value);
+        }
+    }
+
+    private void writeBoolSymbolByHandler(AmsAddr addr, IntByReference nHdlVar, boolean value) {
+        try (Memory memory = new Memory(ADS_BOOL_SIZE)) {
+            memory.setByte(0, (byte) (value ? 1 : 0) );
+            writeSymbolByHandler(addr, nHdlVar, memory, ADS_BOOL_SIZE, "Write bool symbol value: " + value);
+        }
+    }
+
     private AdsDeviceInfo readDeviceInfoByAddr(AmsAddr addr) {
         try (Memory deviceName = new Memory(16)) {
             AdsVersion adsVersion = new AdsVersion();
@@ -50,23 +122,26 @@ public class AdsOperations {
     }
 
     private double[] readLRealArraySymbolByHandler(AmsAddr addr, IntByReference nHdlVar, int size) {
-        try (Memory nData = new Memory(size * ADS_DOUBLE_SIZE)) {
-            readSymbolByHandler(addr, nHdlVar.getValue(), ADS_DOUBLE_SIZE * size, nData, "Reading double array symbol by handler: ");
+        try (Memory nData = new Memory(size * ADS_LREAL_SIZE)) {
+            readSymbolByHandler(addr, nHdlVar.getValue(), ADS_LREAL_SIZE * size, nData, "Reading double array symbol by handler: ");
             return nData.getDoubleArray(0, size);
         }
     }
 
     public void writeIntSymbolByName(String name, short value) {
-        openPort();
-        AmsAddr addr = getAmsAddr();
-        IntByReference nHdlVar = getHandlerByName(addr, name);
+        writeSymbolByName(name, value, this::writeIntSymbolByHandler);
+    }
+
+    private void writeIntSymbolByHandler(AmsAddr addr, IntByReference nHdlVar, short value) {
         try (Memory memory = new Memory(ADS_INT_SIZE)) {
             memory.setShort(0, value);
-            long err = TwinCATADS.INSTANCE.AdsSyncWriteReq(addr, TwinCATADS.ADSIGRP_SYM_VALBYHND, nHdlVar.getValue(), ADS_INT_SIZE, memory);
-            throwIfError("Write int symbol value: " + value, err);
+            writeSymbolByHandler(addr, nHdlVar, memory, ADS_INT_SIZE, "Write int symbol value: " + value);
         }
-        releaseHandler(addr, nHdlVar);
-        closePort();
+    }
+
+    private void writeSymbolByHandler(AmsAddr addr, IntByReference nHdlVar, Memory memory, int size, String errorMessage) {
+        long err = TwinCATADS.INSTANCE.AdsSyncWriteReq(addr, TwinCATADS.ADSIGRP_SYM_VALBYHND, nHdlVar.getValue(), size, memory);
+        throwIfError(errorMessage, err);
     }
 
     public short readIntSymbolByName(String name) {
@@ -127,13 +202,13 @@ public class AdsOperations {
 
     private double readLRealSymbolByHandler(AmsAddr addr, IntByReference nHdlVar) {
         DoubleByReference nData = new DoubleByReference();
-        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_DOUBLE_SIZE, nData.getPointer(), "Reading double symbol by handler: ");
+        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_LREAL_SIZE, nData.getPointer(), "Reading double symbol by handler: ");
         return nData.getValue();
     }
 
     private float readRealSymbolByHandler(AmsAddr addr, IntByReference nHdlVar) {
         FloatByReference nData = new FloatByReference();
-        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_FLOAT_SIZE, nData.getPointer(), "Reading float symbol by handler: ");
+        readSymbolByHandler(addr, nHdlVar.getValue(), ADS_REAL_SIZE, nData.getPointer(), "Reading float symbol by handler: ");
         return nData.getValue();
     }
 
