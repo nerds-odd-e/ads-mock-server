@@ -101,13 +101,15 @@ namespace server
 
         protected override AdsErrorCode OnWriteRawValue(ISymbol symbol, ReadOnlySpan<byte> span)
         {
+            Console.WriteLine("OnWriteRawValue called with symbol: {0}", symbol.InstancePath);
             if (symbol.Size != span.Length && symbol.DataType.IsArrayOfPrimitives())
             {
-                var elementSize = ((ArrayType)symbol.DataType).ElementSize;
-                var val = (double[])symbolValues[symbol.InstancePath];
+                var symbolDataType = (ArrayType)symbol.DataType;
+                var elementSize = symbolDataType.ElementSize;
+                var val = (Array)symbolValues[symbol.InstancePath];
                 for (var i = 0; i < span.Length/ elementSize; i++)
                 {
-                      val[i] = BitConverter.ToDouble(span.ToArray(), i * elementSize);
+                    val.SetValue(BitConverter.ToDouble(span.ToArray(), i * elementSize), i);
                 }
                 return AdsErrorCode.NoError;
             }
