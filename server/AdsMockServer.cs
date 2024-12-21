@@ -66,22 +66,11 @@ namespace server
 
         protected override AdsErrorCode OnReadRawValue(ISymbol symbol, Span<byte> span)
         {
-            object value;
-            AdsErrorCode ret = OnGetValue(symbol, out value);
+            var ret = OnGetValue(symbol, out var value);
 
-            if (value != null)
-            {
-                int bytes = 0;
-                if (_symbolMarshaler.TryMarshal(symbol, value, span, out bytes))
-                {
-                    ret = AdsErrorCode.NoError;
-                }
-                else
-                {
-                    ret = AdsErrorCode.DeviceInvalidSize;
-                }
+            if (value == null) return ret;
 
-            }
+            ret = _symbolMarshaler.TryMarshal(symbol, value, span, out _) ? AdsErrorCode.NoError : AdsErrorCode.DeviceInvalidSize;
             return ret;
         }
 
@@ -92,11 +81,38 @@ namespace server
             return ReadDeviceInfoResponseAsync(sender, invokeId, AdsErrorCode.NoError, deviceInfo.name, adsVersion, cancel);
         }
 
+        protected override Task<ResultWrite> OnWriteAsync(AmsAddress sender, uint invokeId, uint indexGroup, uint indexOffset, ReadOnlyMemory<byte> writeData, CancellationToken cancel)
+        {
+            if (indexGroup == 61445U)
+                return OnWriteValueByHandleAsync(sender, invokeId, indexOffset, writeData, cancel);
+
+            return base.OnWriteAsync(sender, invokeId, indexGroup, indexOffset, writeData, cancel);
+        }
+
+        private Task<ResultWrite> OnWriteValueByHandleAsync(AmsAddress sender, uint invokeId, uint indexOffset, ReadOnlyMemory<byte> writeData, CancellationToken cancel)
+        {
+            AdsErrorCode errorCode = AdsErrorCode.DeviceSymbolNotFound;
+            if (handleTable.TryGetReferencedItem(indexOffset, out var referencedItem) && Symbols.TryGetInstance(referencedItem, out var symbol))
+            {
+                errorCode = writeData.Length <= symbol.GetValueMarshalSize() ? OnWriteRawValue(symbol, writeData.Span) : AdsErrorCode.DeviceInvalidSize;
+            }
+            return Task.FromResult(new ResultWrite(errorCode, invokeId));
+        }
+
         protected override AdsErrorCode OnWriteRawValue(ISymbol symbol, ReadOnlySpan<byte> span)
         {
-            Console.WriteLine("OnWriteRawValue called for symbol: {0} and length: {1}", symbol.InstancePath, span.Length);
-            object value;
-            _symbolMarshaler.Unmarshal(symbol, span, null, out value);
+            if (symbol.Size != span.Length && symbol.DataType.IsArrayOfPrimitives())
+            {
+                var elementSize = ((ArrayType)symbol.DataType).ElementSize;
+                var val = (double[])symbolValues[symbol.InstancePath];
+                for (var i = 0; i < span.Length/ elementSize; i++)
+                {
+                      val[i] = BitConverter.ToDouble(span.ToArray(), i * elementSize);
+                }
+                return AdsErrorCode.NoError;
+            }
+
+            _symbolMarshaler.Unmarshal(symbol, span, null, out var value);
             return SetValue(symbol, value);
         }
 

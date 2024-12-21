@@ -48,3 +48,25 @@ Feature: Verify Symbol
       }
     }
     """
+
+  Scenario: verify written LREAL array symbol less than size
+    Given POST "/array-symbols":
+    """
+    {
+      "name": "first",
+      "type": "LREAL",
+      "size": 4,
+      "value": [1.0, 2.0, 3.0, 0.0]
+    }
+    """
+    When write LREAL array symbol "first" with new value:
+      | 11.0 | 22.0 | 33.0 |
+    Then "/symbols" should response:
+    """
+    : {
+      code= 200
+      body.json= {
+       first: [11.0 22.0 33.0, 0.0]
+      }
+    }
+    """
