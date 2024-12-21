@@ -1,4 +1,4 @@
-Feature: Symbol
+Feature: Stub Symbol
 
   Scenario Outline: add <type> symbol
     When POST "/symbols":

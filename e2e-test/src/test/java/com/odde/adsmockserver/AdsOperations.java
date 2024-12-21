@@ -56,6 +56,19 @@ public class AdsOperations {
         }
     }
 
+    public void writeIntSymbolByName(String name, short value) {
+        openPort();
+        AmsAddr addr = getAmsAddr();
+        IntByReference nHdlVar = getHandlerByName(addr, name);
+        try (Memory memory = new Memory(ADS_INT_SIZE)) {
+            memory.setShort(0, value);
+            long err = TwinCATADS.INSTANCE.AdsSyncWriteReq(addr, TwinCATADS.ADSIGRP_SYM_VALBYHND, nHdlVar.getValue(), ADS_INT_SIZE, memory);
+            throwIfError("Write int symbol value: " + value, err);
+        }
+        releaseHandler(addr, nHdlVar);
+        closePort();
+    }
+
     public short readIntSymbolByName(String name) {
         return readSymbolByName(name, this::readIntSymbolByHandler);
     }

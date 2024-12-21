@@ -95,12 +95,16 @@ namespace server
         protected override AdsErrorCode OnWriteRawValue(ISymbol symbol, ReadOnlySpan<byte> span)
         {
             Console.WriteLine("OnWriteRawValue called for symbol: {0} and length: {1}", symbol.InstancePath, span.Length);
-            return AdsErrorCode.NoError;
+            object value;
+            _symbolMarshaler.Unmarshal(symbol, span, null, out value);
+            return SetValue(symbol, value);
         }
 
         protected override AdsErrorCode OnSetValue(ISymbol symbol, object value, out bool valueChanged)
         {
-            throw new NotImplementedException();
+            symbolValues[symbol.InstancePath] = value;
+            valueChanged = true;
+            return AdsErrorCode.NoError;
         }
 
         protected override AdsErrorCode OnGetValue(ISymbol symbol, out object value)
@@ -168,6 +172,11 @@ namespace server
         public void SetDeviceInfo(SetDeviceInfoRequest request)
         {
             this.deviceInfo = request;
+        }
+
+        public Dictionary<string, object> GetAllSymbols()
+        {
+            return symbolValues;
         }
     }
 }

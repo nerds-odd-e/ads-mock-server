@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace server.Controllers
@@ -24,6 +25,12 @@ namespace server.Controllers
         public void CreateArraySymbol([FromBody] CreateArraySymbolRequest request)
         {
             _adsMockServer.AddArraySymbol(request);
+        }
+
+        [HttpGet ("/symbols")]
+        public Dictionary<string, object> GetAllSymbols()
+        {
+            return _adsMockServer.GetAllSymbols();
         }
 
         [HttpPut ("/device-info")]

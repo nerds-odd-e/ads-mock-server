@@ -1,6 +1,7 @@
 package com.odde.adsmockserver;
 
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.github.leeonky.dal.Assertions.expect;
@@ -23,5 +24,10 @@ public class AdsSteps {
     @Then("ads get device info should be:")
     public void adsGetDeviceInfoShouldBe(String expression) {
        expect(adsOperations.readDeviceInfo()).should(expression);
+    }
+
+    @When("write {string} symbol {string} with new value {short}")
+    public void writeSymbolWithNewValue(String type, String name, short value) {
+        adsOperations.writeIntSymbolByName(name, value);
     }
 }
