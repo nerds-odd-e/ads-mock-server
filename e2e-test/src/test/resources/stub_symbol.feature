@@ -26,29 +26,6 @@ Feature: Stub Symbol
       | DINT  | 42     | readDIntSymbolByName  | 42       |
       | REAL  | 123.06 | readRealSymbolByName  | 123.06f  |
 
-  Scenario Outline: add <type> array symbol
-    When POST "/array-symbols":
-    """
-    {
-      "name": "PC_PLC.s_MoveVel",
-      "type": "<type>",
-      "size": 3,
-      "value": <value>
-    }
-    """
-    Then response should be:
-    """
-    code= 200
-    """
-    Then ads read <type> array symbol by name "PC_PLC.s_MoveVel" and size 3 should:
-    """
-    = <expectedValue>
-    """
-    Examples:
-      | type  | value           | expectedValue      |
-      | LREAL | [1.0, 2.0, 3.0] | [1.0, 2.0, 3.0]    |
-      | REAL  | [1.0, 2.0, 3.0] | [1.0f, 2.0f, 3.0f] |
-
   Scenario Outline: add same name and type <type> symbol twice with different values
     When POST "/symbols":
     """
@@ -112,88 +89,92 @@ Feature: Stub Symbol
     readBoolSymbolByName['PC_PLC.b_error'] = true
     """
 
-  Scenario: add same name and type and size array symbol twice with different values
+  Scenario Outline: add <type> array symbol
+    When POST "/array-symbols":
+    """
+    {
+      "name": "PC_PLC.s_MoveVel",
+      "type": "<type>",
+      "size": 3,
+      "value": <value>
+    }
+    """
+    Then response should be:
+    """
+    code= 200
+    """
+    Then ads read <type> array symbol by name "PC_PLC.s_MoveVel" and size 3 should:
+    """
+    = <expectedValue>
+    """
+    Examples:
+      | type  | value           | expectedValue      |
+      | LREAL | [1.0, 2.0, 3.0] | [1.0, 2.0, 3.0]    |
+      | REAL  | [1.0, 2.0, 3.0] | [1.0f, 2.0f, 3.0f] |
+
+  Scenario Outline: add same name and type <type> and size array symbol twice with different values
     When POST "/array-symbols":
     """
     {
       "name": "PC_PLC.lreal_array",
-      "type": "LREAL",
+      "type": "<type>",
       "size": 4,
-      "value": [1.1, 2.2, 3.3, 4.4]
+      "value": <originalValue>
     }
     """
     When POST "/array-symbols":
     """
     {
       "name": "PC_PLC.lreal_array",
+      "type": "<type>",
+      "size": 4,
+      "value": <newValue>
+    }
+    """
+    Then response should be:
+    """
+    code= 200
+    """
+    Then ads read <type> array symbol by name "PC_PLC.lreal_array" and size 4 should:
+    """
+    : <newValue>
+    """
+    Examples:
+      | type  | originalValue        | newValue             |
+      | REAL  | [1.0, 2.0, 3.0, 4.0] | [5.0, 6.0, 7.0, 8.0] |
+      | LREAL | [1.0, 2.0, 3.0, 4.0] | [5.0, 6.0, 7.0, 8.0] |
+
+  Scenario: add same name array symbol twice with different type will fail
+    When POST "/array-symbols":
+    """
+    {
+      "name": "PC_PLC.array",
       "type": "LREAL",
       "size": 4,
-      "value": [5.5, 6.6, 7.7, 8.8]
-    }
-    """
-    Then response should be:
-    """
-    code= 200
-    """
-    Then ads read LREAL array symbol by name "PC_PLC.lreal_array" and size 4 should:
-    """
-    = [5.5, 6.6, 7.7, 8.8]
-    """
-
-  Scenario: add same type and size array symbol twice with different names
-    When POST "/array-symbols":
-    """
-    {
-      "name": "first",
-      "type": "LREAL",
-      "size": 5,
-      "value": [1.1, 2.2, 3.3, 4.4, 5.5]
+      "value": [1.0, 2.0, 3.0, 4.0]
     }
     """
     When POST "/array-symbols":
     """
     {
-      "name": "second",
-      "type": "LREAL",
-      "size": 5,
-      "value": [1.0, 2.0, 3.0, 4.0, 5.0]
+      "name": "PC_PLC.array",
+      "type": "REAL",
+      "size": 4,
+      "value": [1.0, 2.0, 3.0, 4.0]
     }
     """
     Then response should be:
     """
-    code= 200
-    """
-    Then ads read LREAL array symbol by name "second" and size 5 should:
-    """
-    = [1.0, 2.0, 3.0, 4.0, 5.0]
-    """
-    Then ads read LREAL array symbol by name "first" and size 5 should:
-    """
-    = [1.1, 2.2, 3.3, 4.4, 5.5]
-    """
-
-  Scenario: set device info
-    When PUT "/device-info":
-    """
-    {
-      "name": "szb_plc",
-      "version": 1,
-      "revision": 2,
-      "build": 3
+    : {
+      code= 400
+      body.json= {
+        "error": "The type of the existing symbol does not match the requested type."
+      }
     }
     """
-    Then response should be:
+    Then ads read LREAL array symbol by name "PC_PLC.array" and size 4 should:
     """
-    code= 200
-    """
-    Then ads get device info should be:
-    """
-    = {
-      name: szb_plc
-      version: 1y
-      revision: 2y
-      build: 3s
-    }
+    : [1.0, 2.0, 3.0, 4.0]
     """
 
   Scenario: clear all symbols

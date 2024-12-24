@@ -182,6 +182,10 @@ namespace server
 
         public void AddArraySymbol(CreateArraySymbolRequest request)
         {
+            if (Symbols.TryGetInstance(request.name, out var symbol) && ((ArrayType)symbol.DataType).ElementTypeName != request.type)
+            {
+                throw new BadHttpRequestException("The type of the existing symbol does not match the requested type.");
+            }
             switch (request.type)
             {
                 case "LREAL":
