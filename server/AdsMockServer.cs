@@ -188,6 +188,10 @@ namespace server
             }
             switch (request.type)
             {
+                case "BOOL":
+                    AddArraySymbolByRequestAndType(request, dtBool);
+                    symbolValues[request.name] = request.value.EnumerateArray().Select(x => x.GetBoolean()).ToArray();
+                    break;
                 case "LREAL":
                     AddArraySymbolByRequestAndType(request, dtLReal);
                     symbolValues[request.name] = request.value.EnumerateArray().Select(x => x.GetDouble()).ToArray();

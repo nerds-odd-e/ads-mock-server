@@ -18,7 +18,7 @@ public class AdsSteps {
     }
 
     @Then("ads read LREAL array symbol by name {string} and size {int} should:")
-    public void adsReadArraySymbolByNameAndSizeShould(String name, int size, String expression) {
+    public void adsReadLRealArraySymbolByNameAndSizeShould(String name, int size, String expression) {
         expect(adsOperations.readLRealArraySymbolByName(name, size)).should(expression);
     }
 
@@ -60,5 +60,10 @@ public class AdsSteps {
     @Then("ads read REAL array symbol by name {string} and size {int} should:")
     public void adsReadREALArraySymbolByNameAndSizeShould(String name, int size, String expression) {
         expect(adsOperations.readRealArraySymbolByName(name, size)).should(expression);
+    }
+
+    @Then("ads read BOOL array symbol by name {string} and size {int} should:")
+    public void adsReadREALSymbolByNameShouldBe(String name, int size, String expression) {
+        expect(adsOperations.readBoolArraySymbolByName(name, size)).should(expression);
     }
 }

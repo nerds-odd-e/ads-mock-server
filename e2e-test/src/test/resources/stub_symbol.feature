@@ -108,9 +108,10 @@ Feature: Stub Symbol
     = <expectedValue>
     """
     Examples:
-      | type  | value           | expectedValue      |
-      | LREAL | [1.0, 2.0, 3.0] | [1.0, 2.0, 3.0]    |
-      | REAL  | [1.0, 2.0, 3.0] | [1.0f, 2.0f, 3.0f] |
+      | type  | value               | expectedValue       |
+      | BOOL  | [true, false, true] | [true, false, true] |
+      | LREAL | [1.0, 2.0, 3.0]     | [1.0, 2.0, 3.0]     |
+      | REAL  | [1.0, 2.0, 3.0]     | [1.0f, 2.0f, 3.0f]  |
 
   Scenario Outline: add same name and type <type> and size array symbol twice with different values
     When POST "/array-symbols":
@@ -141,6 +142,7 @@ Feature: Stub Symbol
     """
     Examples:
       | type  | originalValue        | newValue             |
+      | BOOL  | [true, false, false, true]   | [false, true, false, true] |
       | REAL  | [1.0, 2.0, 3.0, 4.0] | [5.0, 6.0, 7.0, 8.0] |
       | LREAL | [1.0, 2.0, 3.0, 4.0] | [5.0, 6.0, 7.0, 8.0] |
 

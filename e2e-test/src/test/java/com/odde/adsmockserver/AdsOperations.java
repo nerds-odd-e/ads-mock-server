@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 
 @Component
 public class AdsOperations {
@@ -25,6 +26,20 @@ public class AdsOperations {
 
     public double[] readLRealArraySymbolByName(String name, int size) {
         return readArraySymbolByName(name, size, this::readLRealArraySymbolByHandler);
+    }
+
+    public Boolean[] readBoolArraySymbolByName(String name, int size) {
+        return readArraySymbolByName(name, size, this::readBoolArraySymbolByHandler);
+    }
+
+    private Boolean[] readBoolArraySymbolByHandler(AmsAddr addr, IntByReference nHdlVar, int size) {
+        try (Memory nData = new Memory(size * ADS_BOOL_SIZE)) {
+            readSymbolByHandler(addr, nHdlVar.getValue(), ADS_BOOL_SIZE * size, nData, "Reading bool array symbol by handler: ");
+            byte[] byteArray = nData.getByteArray(0, size);
+            return IntStream.range(0, byteArray.length)
+                    .mapToObj(i -> byteArray[i] != 0)
+                    .toArray(Boolean[]::new);
+        }
     }
 
     @FunctionalInterface
