@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using server.Controllers;
 using TwinCAT.Ads;
 using TwinCAT.Ads.Server;
@@ -133,6 +134,10 @@ namespace server
 
         public void AddSymbol(CreateSymbolRequest request)
         {
+            if (Symbols.TryGetInstance(request.name, out var symbol) && symbol.DataType.Name != request.type)
+            {
+                throw new BadHttpRequestException("The type of the existing symbol does not match the requested type.");
+            }
             switch (request.type)
             {
                 case "INT":

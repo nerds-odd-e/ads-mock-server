@@ -49,21 +49,21 @@ Feature: Stub Symbol
       | LREAL | [1.0, 2.0, 3.0] | [1.0, 2.0, 3.0]    |
       | REAL  | [1.0, 2.0, 3.0] | [1.0f, 2.0f, 3.0f] |
 
-  Scenario: add same name and type symbol twice with different values
+  Scenario Outline: add same name and type <type> symbol twice with different values
     When POST "/symbols":
     """
     {
       "name": "PC_PLC.b_error",
-      "type": "BOOL",
-      "value": true
+      "type": "<type>",
+      "value": <originalValue>
     }
     """
     When POST "/symbols":
     """
     {
       "name": "PC_PLC.b_error",
-      "type": "BOOL",
-      "value": false
+      "type": "<type>",
+      "value": <newValue>
     }
     """
     Then response should be:
@@ -72,7 +72,44 @@ Feature: Stub Symbol
     """
     Then ads operation should:
     """
-    readBoolSymbolByName['PC_PLC.b_error'] = false
+    <adsOpt>['PC_PLC.b_error']: <newValue>
+    """
+    Examples:
+      | type  | originalValue | newValue | adsOpt                |
+      | BOOL  | true          | false    | readBoolSymbolByName  |
+      | INT   | 42            | 123      | readIntSymbolByName   |
+      | DINT  | 42            | 123      | readDIntSymbolByName  |
+      | REAL  | 123.06        | 42       | readRealSymbolByName  |
+      | LREAL | 123.06        | 42       | readLRealSymbolByName |
+
+  Scenario: add same name symbol twice with different type will fail
+    When POST "/symbols":
+    """
+    {
+      "name": "PC_PLC.b_error",
+      "type": "BOOL",
+      "value": true
+    }
+    """
+    When POST "Symbol" "/symbols":
+    """
+    {
+      "name": "PC_PLC.b_error",
+      "type": "INT"
+    }
+    """
+    Then response should be:
+    """
+    : {
+      code= 400
+      body.json= {
+        "error": "The type of the existing symbol does not match the requested type."
+      }
+    }
+    """
+    Then ads operation should:
+    """
+    readBoolSymbolByName['PC_PLC.b_error'] = true
     """
 
   Scenario: add same name and type and size array symbol twice with different values
