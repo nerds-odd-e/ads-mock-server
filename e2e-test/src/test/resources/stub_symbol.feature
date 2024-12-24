@@ -26,7 +26,7 @@ Feature: Stub Symbol
       | DINT  | 42     | readDIntSymbolByName  | 42       |
       | REAL  | 123.06 | readRealSymbolByName  | 123.06f  |
 
-  Scenario: add double array symbol
+  Scenario: add LREAL array symbol
     When POST "/array-symbols":
     """
     {
@@ -43,6 +43,25 @@ Feature: Stub Symbol
     Then ads read LREAL array symbol by name "PC_PLC.s_MoveVel" and size 3 should:
     """
     = [1.0, 2.0, 3.0]
+    """
+
+  Scenario: add REAL array symbol
+    When POST "/array-symbols":
+    """
+    {
+      "name": "PC_PLC.s_MoveVel",
+      "type": "REAL",
+      "size": 3,
+      "value": [1.0, 2.0, 3.0]
+    }
+    """
+    Then response should be:
+    """
+    code= 200
+    """
+    Then ads read REAL array symbol by name "PC_PLC.s_MoveVel" and size 3 should:
+    """
+    = [1.0f, 2.0f, 3.0f]
     """
 
   Scenario: add same size double array symbol twice

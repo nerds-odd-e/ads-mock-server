@@ -56,4 +56,9 @@ public class AdsSteps {
     public void writeLREALArraySymbolWithNewValue(String name, DataTable table) {
         adsOperations.writeLRealArraySymbolByName(name, table.asList().stream().map(Double::parseDouble).toArray(Double[]::new));
     }
+
+    @Then("ads read REAL array symbol by name {string} and size {int} should:")
+    public void adsReadREALArraySymbolByNameAndSizeShould(String name, int size, String expression) {
+        expect(adsOperations.readRealArraySymbolByName(name, size)).should(expression);
+    }
 }

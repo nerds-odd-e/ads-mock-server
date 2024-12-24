@@ -180,11 +180,20 @@ namespace server
             switch (request.type)
             {
                 case "LREAL":
-                    ArrayType doubleArrayType = new ArrayType(dtLReal, new DimensionCollection().AddDimension(new Dimension(0, request.size)));
-                    symbolFactory.AddSymbol(request.name, doubleArrayType, dataArea);
+                    AddArraySymbolByRequestAndType(request, dtLReal);
                     symbolValues[request.name] = request.value.EnumerateArray().Select(x => x.GetDouble()).ToArray();
                     break;
+                case "REAL":
+                    AddArraySymbolByRequestAndType(request, dtReal);
+                    symbolValues[request.name] = request.value.EnumerateArray().Select(x => x.GetSingle()).ToArray();
+                    break;
             }
+        }
+
+        private void AddArraySymbolByRequestAndType(CreateArraySymbolRequest request, PrimitiveType primitiveType)
+        {
+            ArrayType arrayType = new ArrayType(primitiveType, new DimensionCollection().AddDimension(new Dimension(0, request.size)));
+            symbolFactory.AddSymbol(request.name, arrayType, dataArea);
         }
 
         public void SetDeviceInfo(SetDeviceInfoRequest request)
