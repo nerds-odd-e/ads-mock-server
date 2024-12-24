@@ -26,45 +26,84 @@ Feature: Stub Symbol
       | DINT  | 42     | readDIntSymbolByName  | 42       |
       | REAL  | 123.06 | readRealSymbolByName  | 123.06f  |
 
-  Scenario: add LREAL array symbol
+  Scenario Outline: add <type> array symbol
     When POST "/array-symbols":
     """
     {
       "name": "PC_PLC.s_MoveVel",
-      "type": "LREAL",
+      "type": "<type>",
       "size": 3,
-      "value": [1.0, 2.0, 3.0]
+      "value": <value>
     }
     """
     Then response should be:
     """
     code= 200
     """
-    Then ads read LREAL array symbol by name "PC_PLC.s_MoveVel" and size 3 should:
+    Then ads read <type> array symbol by name "PC_PLC.s_MoveVel" and size 3 should:
     """
-    = [1.0, 2.0, 3.0]
+    = <expectedValue>
     """
+    Examples:
+      | type  | value           | expectedValue      |
+      | LREAL | [1.0, 2.0, 3.0] | [1.0, 2.0, 3.0]    |
+      | REAL  | [1.0, 2.0, 3.0] | [1.0f, 2.0f, 3.0f] |
 
-  Scenario: add REAL array symbol
-    When POST "/array-symbols":
+  Scenario: add same name and type symbol twice with different values
+    When POST "/symbols":
     """
     {
-      "name": "PC_PLC.s_MoveVel",
-      "type": "REAL",
-      "size": 3,
-      "value": [1.0, 2.0, 3.0]
+      "name": "PC_PLC.b_error",
+      "type": "BOOL",
+      "value": true
+    }
+    """
+    When POST "/symbols":
+    """
+    {
+      "name": "PC_PLC.b_error",
+      "type": "BOOL",
+      "value": false
     }
     """
     Then response should be:
     """
     code= 200
     """
-    Then ads read REAL array symbol by name "PC_PLC.s_MoveVel" and size 3 should:
+    Then ads operation should:
     """
-    = [1.0f, 2.0f, 3.0f]
+    readBoolSymbolByName['PC_PLC.b_error'] = false
     """
 
-  Scenario: add same size double array symbol twice
+#  Scenario: add same name and type array symbol twice with different size and values
+#    When POST "/array-symbols":
+#    """
+#    {
+#      "name": "PC_PLC.lreal_array",
+#      "type": "LREAL",
+#      "size": 4,
+#      "value": [1.1, 2.2, 3.3, 4.4]
+#    }
+#    """
+#    When POST "/array-symbols":
+#    """
+#    {
+#      "name": "PC_PLC.lreal_array",
+#      "type": "LREAL",
+#      "size": 5,
+#      "value": [1.0, 2.0, 3.0, 4.0, 5.0]
+#    }
+#    """
+#    Then response should be:
+#    """
+#    code= 200
+#    """
+#    Then ads read LREAL array symbol by name "PC_PLC.lreal_array" and size 5 should:
+#    """
+#    = [1.0, 2.0, 3.0, 4.0, 5.0]
+#    """
+
+  Scenario: add same type and size array symbol twice with different names
     When POST "/array-symbols":
     """
     {
