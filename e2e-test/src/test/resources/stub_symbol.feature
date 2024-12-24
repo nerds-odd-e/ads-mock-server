@@ -75,33 +75,33 @@ Feature: Stub Symbol
     readBoolSymbolByName['PC_PLC.b_error'] = false
     """
 
-#  Scenario: add same name and type array symbol twice with different size and values
-#    When POST "/array-symbols":
-#    """
-#    {
-#      "name": "PC_PLC.lreal_array",
-#      "type": "LREAL",
-#      "size": 4,
-#      "value": [1.1, 2.2, 3.3, 4.4]
-#    }
-#    """
-#    When POST "/array-symbols":
-#    """
-#    {
-#      "name": "PC_PLC.lreal_array",
-#      "type": "LREAL",
-#      "size": 5,
-#      "value": [1.0, 2.0, 3.0, 4.0, 5.0]
-#    }
-#    """
-#    Then response should be:
-#    """
-#    code= 200
-#    """
-#    Then ads read LREAL array symbol by name "PC_PLC.lreal_array" and size 5 should:
-#    """
-#    = [1.0, 2.0, 3.0, 4.0, 5.0]
-#    """
+  Scenario: add same name and type and size array symbol twice with different values
+    When POST "/array-symbols":
+    """
+    {
+      "name": "PC_PLC.lreal_array",
+      "type": "LREAL",
+      "size": 4,
+      "value": [1.1, 2.2, 3.3, 4.4]
+    }
+    """
+    When POST "/array-symbols":
+    """
+    {
+      "name": "PC_PLC.lreal_array",
+      "type": "LREAL",
+      "size": 4,
+      "value": [5.5, 6.6, 7.7, 8.8]
+    }
+    """
+    Then response should be:
+    """
+    code= 200
+    """
+    Then ads read LREAL array symbol by name "PC_PLC.lreal_array" and size 4 should:
+    """
+    = [5.5, 6.6, 7.7, 8.8]
+    """
 
   Scenario: add same type and size array symbol twice with different names
     When POST "/array-symbols":
